@@ -26,13 +26,36 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
   integer i1, i2, i3
 
   ! Get the nearest neighbors 
+  print *, "BEFORE ALLOCATION"
+  call flush()
 
   ALLOCATE(nn_at(nat_sc,6))
   ALLOCATE(nn_vect(nat_sc,6,3))
-  call assign_NN (tau_sc,at_sc,ityp_sc,nn_at, nn_vect)
+
+  print *, "ASSIGN NEAR NEIGHBOUR:"
+  print *, "TAU_SC:"
+  do i1 =1 , nat_sc 
+    print *, tau_sc(:, i1)
+  enddo
+  print *, "AT_SC:"
+  do i1 =1 , 3 
+    print *, at_sc(:, i1)
+  enddo
+
+  print *, "ITYP_SC: ", ityp_sc(:)
+  call flush()
+  ! NN : TODO, pass to NN a parameter that is the nearest neighbour distance.
+  !      This can be done in the initialization function and passed through it.
+  call assign_NN (tau_sc,at_sc,ityp_sc,nn_at, nn_vect, nat_sc)
   
   ALLOCATE(slv_idx(nat_sc,6))
+
+  print *, "ASSIGN PM"
+  call flush()
   call assign_PM (nat_sc, nn_vect, nn_at, slv_idx)
+
+  print *, "AFTER ALLOCATION"
+  call flush()
 
   ! Get forces for each configuration
 
@@ -40,6 +63,9 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
 
   CONFIGURATIONS_LOOP_2 : &
   DO i1 = 1, n_random
+
+    print *, "N CONF:", i1 
+    call flush()
   
    !-------------------------------------
    ! CAREFUL:

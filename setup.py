@@ -1,4 +1,5 @@
-import setuptools
+#import setuptools
+from __future__ import print_function
 from numpy.distutils.core import setup, Extension
 
 
@@ -20,3 +21,8 @@ setup(name = "fforces",
       package_dir = {"fforces": "Modules"},
       license = "GPLv3",
       ext_modules = [f3_lib])
+
+
+def readme():
+    with open("README.md") as f:
+        return f.read()

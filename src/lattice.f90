@@ -2,7 +2,7 @@
 ! This subroutine assigns nearest neighbors if an atom in a 
 ! supercell in a fcc lattice
 
-subroutine assign_NN (tau_sc, at_sc, ityp_sc, nn_at, nn_vect, natsc)
+subroutine assign_NN (tau_sc, at_sc, ityp_sc, nn_at, nn_vect, nn_dist, natsc)
 
   implicit none
 
@@ -11,19 +11,23 @@ subroutine assign_NN (tau_sc, at_sc, ityp_sc, nn_at, nn_vect, natsc)
   double precision, dimension(3,3), intent(in) :: at_sc
   integer, dimension(natsc,6), intent(out) :: nn_at  
   double precision, dimension(natsc,6,3), intent(out) :: nn_vect
+  double precision :: nn_dist ! Distance between two nearest negibours
   integer :: natsc
 
   integer,parameter :: far =2
   double precision, dimension((2*far+1)**3,3) :: t_vectors
   double precision, dimension(3) :: vect
   integer :: i, k, j, l
-  double precision :: nn_dist, dist
+  !double precision :: nn_dist
+  double precision :: dist
 
   !natsc = size(tau_sc(1,:))
 
   ! Distance between nearest neighbors
 
-  nn_dist = 0.5d0
+  !nn_dist = 0.5d0
+  
+  
 
   ! Create supercell lattice vectors
 
@@ -61,17 +65,21 @@ subroutine assign_NN (tau_sc, at_sc, ityp_sc, nn_at, nn_vect, natsc)
 
 end subroutine assign_NN
 
-subroutine assign_PM(nat_sc, index_vect, index_mat, slv_idx)
+subroutine assign_PM(nat_sc, index_vect, index_mat, nn_dist, slv_idx)
   implicit none
 
   integer,intent(IN)   :: nat_sc
   double precision, intent(IN) :: index_vect(nat_sc,6,3)
   integer,intent(IN)   :: index_mat(nat_sc,6)
+  double precision, intent(IN) :: nn_dist
   integer,intent(OUT) :: slv_idx(nat_sc,6)
 
   double precision :: dist(3)
   integer :: i,j, jj, is
   double precision ::  special(3,6), proj, aux
+  
+  logical, parameter :: debug = .false.
+
 
   special(:,1) = (/ 1.d0, 0.d0, 0.d0 /)
   special(:,2) = (/-1.d0, 0.d0, 0.d0 /)
@@ -81,8 +89,10 @@ subroutine assign_PM(nat_sc, index_vect, index_mat, slv_idx)
   special(:,6) = (/ 0.d0, 0.d0,-1.d0 /)
 
 
+
+
   do i = 1,nat_sc
-  write(*,*) "neighbours of atom", i
+     if (debug) write(*,*) "neighbours of atom", i
   do is = 1,6 ! six special directions
     proj = 0.d0
     do jj = 1,6 ! first neighbours
@@ -97,7 +107,7 @@ subroutine assign_PM(nat_sc, index_vect, index_mat, slv_idx)
       ENDIF
 
     enddo
-   write(*,'(2(a,i3),2(a,3f10.4))') "type", is, " idx", slv_idx(i, is) 
+   if (debug) write(*,'(2(a,i3),2(a,3f10.4))') "type", is, " idx", slv_idx(i, is) 
   enddo
   enddo
 

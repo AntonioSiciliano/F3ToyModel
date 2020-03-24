@@ -1,5 +1,5 @@
 SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, tau_sc, &
-                               b,c,p2,p3,p4,p5,p6,p4x,p3x,p4f,p4g, &
+                               b,c,p2,p3,p4,p5,p6,p4x,p3x,p4f,p4g, nn_at, nn_vect, slv_idx, &
                                forces, v, n_random, nat_sc)
   
   implicit none
@@ -14,10 +14,11 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
   DOUBLE PRECISION, intent(in) :: b,c,p2, p3, p3x, p4, p4x, p4f, p4g, p6, p5
   DOUBLE PRECISION, dimension(n_random,nat_sc,3), intent(out) :: forces  
   DOUBLE PRECISION, dimension(n_random), intent(out) :: v        
-
+  integer, dimension(nat_sc, 6) :: nn_at, slv_idx
+  double precision, dimension(nat_sc, 6, 3) :: nn_vect
   
-  integer, dimension(:,:), allocatable :: nn_at, slv_idx
-  DOUBLE PRECISION, dimension(:,:,:), allocatable :: nn_vect
+  !integer, dimension(:,:), allocatable :: nn_at, slv_idx
+  !DOUBLE PRECISION, dimension(:,:,:), allocatable :: nn_vect
   DOUBLE PRECISION :: v_anharmonic
   DOUBLE PRECISION, dimension(3) :: dispvect
 
@@ -26,36 +27,36 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
   integer i1, i2, i3
 
   ! Get the nearest neighbors 
-  print *, "BEFORE ALLOCATION"
-  call flush()
+  !print *, "BEFORE ALLOCATION"
+  !call flush()
 
-  ALLOCATE(nn_at(nat_sc,6))
-  ALLOCATE(nn_vect(nat_sc,6,3))
+  !ALLOCATE(nn_at(nat_sc,6))
+  !ALLOCATE(nn_vect(nat_sc,6,3))
 
-  print *, "ASSIGN NEAR NEIGHBOUR:"
-  print *, "TAU_SC:"
-  do i1 =1 , nat_sc 
-    print *, tau_sc(:, i1)
-  enddo
-  print *, "AT_SC:"
-  do i1 =1 , 3 
-    print *, at_sc(:, i1)
-  enddo
+  !print *, "ASSIGN NEAR NEIGHBOUR:"
+  !print *, "TAU_SC:"
+  ! do i1 =1 , nat_sc 
+  !   print *, tau_sc(:, i1)
+  ! enddo
+  ! !print *, "AT_SC:"
+  ! do i1 =1 , 3 
+  !   print *, at_sc(:, i1)
+  ! enddo
 
-  print *, "ITYP_SC: ", ityp_sc(:)
-  call flush()
-  ! NN : TODO, pass to NN a parameter that is the nearest neighbour distance.
-  !      This can be done in the initialization function and passed through it.
-  call assign_NN (tau_sc,at_sc,ityp_sc,nn_at, nn_vect, nat_sc)
+  ! print *, "ITYP_SC: ", ityp_sc(:)
+  ! call flush()
+  ! ! NN : TODO, pass to NN a parameter that is the nearest neighbour distance.
+  ! !      This can be done in the initialization function and passed through it.
+  ! !call assign_NN (tau_sc,at_sc,ityp_sc,nn_at, nn_vect, nat_sc)
   
-  ALLOCATE(slv_idx(nat_sc,6))
+  ! !ALLOCATE(slv_idx(nat_sc,6))
 
-  print *, "ASSIGN PM"
-  call flush()
-  call assign_PM (nat_sc, nn_vect, nn_at, slv_idx)
+  ! print *, "ASSIGN PM"
+  ! call flush()
+  ! !call assign_PM (nat_sc, nn_vect, nn_at, slv_idx)
 
-  print *, "AFTER ALLOCATION"
-  call flush()
+  ! print *, "AFTER ALLOCATION"
+  ! call flush()
 
   ! Get forces for each configuration
 
@@ -64,13 +65,21 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
   CONFIGURATIONS_LOOP_2 : &
   DO i1 = 1, n_random
 
-    print *, "N CONF:", i1 
-    call flush()
+    ! print *, "N CONF:", i1 
+    ! call flush()
   
    !-------------------------------------
    ! CAREFUL:
    ! Not including effective charges here
-   call get_harmonic_force_from_fc(phi_sc_harmonic,u_vector(i1,:,:),forces(i1,:,:), nat_sc)
+    call get_harmonic_force_from_fc(phi_sc_harmonic,u_vector(i1,:,:),forces(i1,:,:), nat_sc)
+    ! print * , "DISP:", u_vector(i1, 3, 1)
+    ! print *, "PHI:"
+    ! do i2 = 1, 3
+    !    print *, phi_sc_harmonic(:, i2, 1, 1)
+    ! enddo
+    ! !do i2 = 1, nat_sc
+    ! !   print *, u_vector(i1,i2,:)
+    ! !enddo
 
     ! Add anharmonic bit to some of the atoms on top
     ANHARMONIC_FORCE_FIELDS : &
@@ -289,7 +298,7 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
     enddo
     
     ELSE IF (type_cal == "harmx") THEN 
-      print*, "skipping 3rd and 4th order terms"
+      !print*, "skipping 3rd and 4th order terms"
     ELSE
       print*, "what?"
       STOP 3
@@ -299,14 +308,14 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
     END DO &
     CONFIGURATIONS_LOOP_2 
         
-  print *, ''
-  print *, ' ****************************************'
-  print *, ' *                                      *'
-  print *, ' *   GET THE FREE ENERGY FOR EACH       *'
-  print *, ' *           CONFIGURATION              *'
-  print *, ' *                                      *'
-  print *, ' ****************************************'
-  print *, ''
+  ! print *, ''
+  ! print *, ' ****************************************'
+  ! print *, ' *                                      *'
+  ! print *, ' *   GET THE FREE ENERGY FOR EACH       *'
+  ! print *, ' *           CONFIGURATION              *'
+  ! print *, ' *                                      *'
+  ! print *, ' ****************************************'
+  ! print *, ''
 
   !--------------------------------------------------------------!
   ! THIS NEEDS TO BE CORRECTED IF EFFECTIVE CHARGES ARE PRESENT  ! 

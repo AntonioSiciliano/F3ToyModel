@@ -81,6 +81,12 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
     ! !   print *, u_vector(i1,i2,:)
     ! !enddo
 
+    ! print *, "HARMONIC FORCE CONF", i1
+    ! do i2 = 1, nat_sc
+    !   print *, forces(i1, i2, :)
+    ! enddo 
+
+
     ! Add anharmonic bit to some of the atoms on top
     ANHARMONIC_FORCE_FIELDS : &
     IF(type_cal == 'pdhxx' ) THEN
@@ -119,9 +125,19 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
         
     ELSE IF (type_cal == 'pbtex') THEN ! ANHARMONIC_FORCE_FIELDS 
       !
-      do i2 = 1, nat_sc
+      ! print *, "INSIDE PBTEX:"
+      ! print *, "p2 = ", p2
+      ! print*, "p3 = ", p3
+      ! print *, "p4 = ", p4
+      ! print*, "p5 = ", p5, "p6 =", p6
+      ! print *, "p3x = ", p3x, "p4x = ", p4x
+      ! print *, "p4f =", p4f, "p4g =", p4g
 
-! forces,  x component !
+      do i2 = 1, nat_sc
+!         print *, "    ATOM:", i2, "NN:", slv_idx(i2,:)
+!         print *, "    DELTA:", u_vector(i1,slv_idx(i2,1),1)-u_vector(i1,i2,1), u_vector(i1,slv_idx(i2,2),1)-u_vector(i1,i2,1)
+! ! forces,  x component !
+!         print *, "F BEFORE ANHARM:", forces(i1, i2,1)
   forces(i1,i2,1)= forces(i1,i2,1) &
         +p2*(-2.d0/sqrt(2.d0)**2) * ( &                ! Anharmonic contribution
         ( (u_vector(i1,slv_idx(i2,1),1)-u_vector(i1,i2,1)) & 
@@ -143,7 +159,7 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
            +(u_vector(i1,slv_idx(i2,2),1)-u_vector(i1,i2,1))**5)&
            )
    ! including crossed terms  !
-  
+
     forces(i1,i2,1)= forces(i1,i2,1) &
     - 0.5d0*p4x * ( &
        (u_vector(i1,slv_idx(i2,1),1)-u_vector(i1,i2,1))&
@@ -321,10 +337,13 @@ SUBROUTINE get_forces_energies(phi_sc_harmonic,u_vector,type_cal,ityp_sc,at_sc, 
   ! THIS NEEDS TO BE CORRECTED IF EFFECTIVE CHARGES ARE PRESENT  ! 
   ! AND ALSO FOR THE OTHER FORCE FIELDS                           !
   !                                                              !
+
   do i1 = 1, n_random
+
     ! Get harmonic contribution of the potential to the free energy
   v_anharmonic = 0.0d0
     call v2_0_harmonic (u_vector(i1,:,:),phi_sc_harmonic,v_anharmonic, nat_sc)
+
     do i2 = 1, nat_sc
       !!!!!!!!!
       ! CAREFUL

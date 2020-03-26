@@ -30,9 +30,10 @@ class ToyModelCalculator(calc.Calculator):
 
         # The parameters
         # The second order force constant enhancement factor
-        self.p2 = 1
+        self.p2 = 0
 
         # The third and higher order coefficients
+        # NOTE: ALL THE COEFFICIENTS ARE IN Ha units!  
         self.p3 = 0
         self.p4 = 0
         self.p5 = 0
@@ -98,10 +99,13 @@ class ToyModelCalculator(calc.Calculator):
         u_disp[0, :, :] = structure.coords * CC.Units.A_TO_BOHR - self.tau_sc.T 
 
         # Perform the calculation
-        forces, v = f3libs.get_forces_energies(self.phi_sc_harmonic, u_disp, self.type_cal, self.ityp_sc, \
+        forces, v = f3libs.get_forces_energies(self.phi_sc_harmonic / 2, u_disp, self.type_cal, self.ityp_sc, \
             self.at_sc, self.tau_sc, self.b, self.c, self.p2, self.p3, self.p4, self.p5, self.p6, \
                                                self.p4x, self.p3x, self.p4f, self.p4g,
                                                self.nn_at, self.nn_vect, self.slv_idx)
+        
+        forces *= 2# Ha -> Ry
+        v *= 2 # Ha -> Ry
 
         # print("Calculated energy forces:")
         # f = np.zeros((self.nat_sc, 3), dtype = np.double)
